@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requête Ajax au serveur mock</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Tester une requête POST</h1>
+    <div id="result"></div>
+
+    <script>
+        // Fonction appelée au chargement de la page
+        window.onload = sendRequest;
+
+        function sendRequest() {
+            // Données à envoyer
+            const dataToSend = {
+                t: [5, 2, 9, 7, 4] // Exemple de tableau
+            };
+
+            // Requête POST avec jQuery Ajax
+            $.ajax({
+                url: "https://db60065e-05a6-4af6-87b1-311dc37ef9a3.mock.pstmn.io/Post", // URL du serveur mock
+                method: "POST",
+                dataType: "json", 
+                success: function (response) {
+                    console.log("Réponse reçue :", response);
+                }
+            })
+        }
+        
+    </script>
+</body>
+</html>
