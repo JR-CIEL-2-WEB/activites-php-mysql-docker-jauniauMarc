@@ -1,0 +1,138 @@
+<!DOCTYPE html> 
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>JSON Courses</title>
+</head>
+<body>
+
+<h1>JRostand Reperes Stade</h1>
+<hr>
+<div id="menu">
+    <label for="courseSelect">Choisissez une course :</label>
+    <select id="courseSelect">
+        <option value="">-- Choisir une course --</option>
+    </select>
+</div>
+<div id="map">...</div>
+
+<style type="text/css">
+    /* Always set the map height explicitly to define the size of the div */
+    #map {
+        height: 90%;
+    }
+
+    /* Optional: Makes the sample page fill the window. */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    #menu {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 5;
+        background: white;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+</style>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7Y32T_PJHZxYcK3BJYJFNwSl6cuvLXpo&callback=initMap"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+    window.onload = loadCourses;
+
+    function loadCourses() {
+        $.ajax({
+            url: "markers.json", // Fichier contenant les courses
+            method: "GET",
+            dataType: "JSON",
+            success: function (courses) {
+                const selectElement = document.getElementById("courseSelect");
+
+                courses.forEach(course => {
+                    const option = document.createElement("option");
+                    option.value = course.id;
+                    option.textContent = course.name;
+                    selectElement.appendChild(option);
+                });
+
+                // Afficher toutes les courses au départ
+                courses.forEach(course => {
+                    initMap(course.markers, false);
+                });
+
+                // Écouteur pour changement de sélection
+                selectElement.addEventListener("change", () => {
+                    const selectedCourseId = selectElement.value;
+                    const selectedCourse = courses.find(course => course.id == selectedCourseId);
+
+                    if (selectedCourse) {
+                        initMap(selectedCourse.markers, true);
+                    }
+                });
+            },
+
+        });
+    }
+
+    async function initMap(markers) {
+        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary(
+            "marker",
+        );        
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 5,
+            center: { lat: 48.95930033308523, lng: 2.5477890651742516 },
+            
+        });
+
+        for (let i = 0; i < markers.length; i++) {
+            new google.maps.Marker({
+                position: { lat: markers[i].lat, lng: markers[i].lng },
+                map: map,
+            });
+        }
+    
+
+  /*relier les maqueurs*/ 
+  const flightPath = new google.maps.Polyline({
+    path: markers,
+    geodesic: true,
+    strokeColor: "#FF0000",
+    strokeOpacity: 1.0,
+    strokeWeight: 2,
+  });
+
+  /*afficher les lignes*/
+  flightPath.setMap(map);
+
+  const infoWindow = new InfoWindow();
+
+// Create the markers.
+markers.forEach((markerData, index) => {
+            const marker = new google.maps.Marker({
+                position: { lat: markerData.lat, lng: markerData.lng },
+                map: map,
+                title: markerData.title
+            });
+
+
+  // Add a click listener for each marker, and set up the info window.
+  marker.addListener("click", () => {
+    infoWindow.setContent(marker.title);
+    infoWindow.open(map, marker);
+  });
+});
+}    
+
+    window.initMap = initMap;
+</script>
+
+</body>
+</html>
